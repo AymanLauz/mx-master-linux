@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "mx-master-linux"
+version = "0.1.0"
+description = "Userspace daemon for Logitech MX Master 3S on Linux"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "evdev>=1.6",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+mx-master = "mx_master.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mx_master*"]

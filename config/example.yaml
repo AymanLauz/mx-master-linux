@@ -1,0 +1,45 @@
+# MX Master 3S — button configuration
+# Copy this file to ~/.config/mx-master/config.yaml and edit as needed.
+# After editing, run: systemctl --user restart mx-master
+
+buttons:
+  # Scroll wheel click → auto-scroll mode (move mouse to scroll, click again to exit)
+  middle_click:
+    action: auto_scroll
+
+  # Small square button below scroll wheel → screenshot
+  mode_shift:
+    action: command
+    value: "flameshot gui"
+
+  # Large thumb rest button → Super key (open app launcher)
+  gesture_click:
+    action: key
+    value: "super"
+
+  # Hold gesture button + move mouse → switch workspaces
+  gesture_move:
+    action: workspace_swipe
+
+  # Side scroll wheel → volume
+  thumb_wheel_up:
+    action: volume_up
+    step: 5        # percent per scroll tick
+
+  thumb_wheel_down:
+    action: volume_down
+    step: 5
+
+  # Back and forward thumb buttons (already work, but configurable here)
+  back:
+    action: key
+    value: "alt+Left"
+
+  forward:
+    action: key
+    value: "alt+Right"
+
+# Advanced: override the workspace switch keys if your desktop uses different shortcuts
+workspace_swipe:
+  left:  "super+Page_Up"
+  right: "super+Page_Down"
