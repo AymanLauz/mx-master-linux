@@ -20,12 +20,10 @@ from . import device as device_finder
 log = logging.getLogger(__name__)
 
 
-# Maps HID++ task_id → our internal button names.
-# These are standard Logitech task IDs across devices.
-_TASK_ID_NAMES = {
+# Maps HID++ ctrl_id → our internal button names.
+_CTRL_ID_NAMES = {
     0x00C4: "mode_shift",
     0x00D7: "gesture_click",
-    0x00DC: "thumb_wheel_click",
 }
 
 
@@ -53,6 +51,11 @@ class Daemon:
 
         # Set up HID++ and unlock buttons
         self._hidpp = HIDPPDevice(hidraw_path, debug=self._debug)
+        if self._debug:
+            try:
+                self._hidpp.enumerate_features()
+            except HIDPPError as e:
+                print(f"  feature enumeration failed: {e}")
         try:
             self._hidpp.unlock_buttons()
             self._hidpp.enable_thumbwheel()
@@ -76,7 +79,7 @@ class Daemon:
 
             for fd in readable:
                 if fd == hidraw_fd:
-                    event = self._hidpp.read_event(timeout_ms=0)
+                    event = self._hidpp.read_event(timeout_ms=1)
                     if event:
                         self._handle_hidpp(event)
 
@@ -93,13 +96,10 @@ class Daemon:
             ctrl_id = event["ctrl_id"]
             pressed = event["pressed"]
 
-            # Resolve ctrl_id → task_id → button name
-            ctrl_info = self._hidpp.controls.get(ctrl_id, {})
-            task_id   = ctrl_info.get("task_id", 0)
-            name      = _TASK_ID_NAMES.get(task_id)
+            name = _CTRL_ID_NAMES.get(ctrl_id)
 
             if self._debug:
-                print(f"HID++ button: ctrl={ctrl_id:#06x} task={task_id:#06x} name={name} pressed={pressed}")
+                print(f"HID++ button: ctrl={ctrl_id:#06x} name={name} pressed={pressed}")
 
             if name == "gesture_click":
                 self._gesture_held = pressed
@@ -117,16 +117,22 @@ class Daemon:
             elif delta < 0:
                 self._runner.run("thumb_wheel_down")
 
+        elif event["type"] == "raw" and self._debug:
+            print(f"HID++ raw: {event['data'].hex(' ')}")
+
     def _handle_evdev(self, event: dict) -> None:
         if event["type"] == "button":
             name    = event["name"]
             pressed = event["pressed"]
 
-            if name == "middle_click" and pressed:
-                if self._scroller.active:
-                    self._scroller.stop()
+            if name == "middle_click":
+                if pressed:
+                    self._gesture_held = True
                 else:
-                    self._scroller.start()
+                    if self._gesture_held:
+                        # Released without a swipe → tap = Super key
+                        self._runner.run("gesture_click")
+                    self._gesture_held = False
                 return
 
             if pressed:
@@ -135,14 +141,10 @@ class Daemon:
         elif event["type"] == "move":
             dx, dy = event["dx"], event["dy"]
 
-            if self._scroller.active:
-                self._scroller.update(dx, dy)
-
             if self._gesture_held:
                 # Threshold before we commit to a swipe direction
                 if abs(dx) > 30:
                     self._runner.workspace_swipe("right" if dx > 0 else "left")
-                    # Reset gesture state so we don't fire repeatedly
                     self._gesture_held = False
 
         elif event["type"] == "scroll":

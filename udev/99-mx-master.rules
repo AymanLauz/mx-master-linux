@@ -1,0 +1,4 @@
+# Allow input-group users to access the MX Master 3S hidraw interface.
+# Covers Bluetooth (bus 0005) with product ID B034.
+SUBSYSTEM=="hidraw", KERNELS=="0005:046D:B034.*", MODE="0660", GROUP="input"
+KERNEL=="uinput", MODE="0660", GROUP="input"

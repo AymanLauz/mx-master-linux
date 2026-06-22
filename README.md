@@ -1,10 +1,10 @@
 # MX Master Linux
 
-A userspace daemon for the **Logitech MX Master 3S** on Linux that unlocks all mouse buttons and lets you map each one to any action — key combos, shell commands, or system controls.
+> I'm a computer science student who switched to Linux and discovered my Logitech MX Master 3S had zero software support — Logi Options+ simply doesn't exist on Linux. I wanted to find out how quickly I could build a full replacement from the ground up, using **Claude Code** as my co-pilot. This repo is the result of that experiment.
 
-Built because Logitech's official software (Logi Options+) doesn't exist on Linux.
+A userspace daemon for the **Logitech MX Master 3S** on Linux that unlocks all mouse buttons and maps each one to any action — key combos, shell commands, or system controls.
 
-> **Status:** Active development — see [Development Journey](#development-journey) for progress.
+> **Status:** Active development — see [What's Working](#whats-working) and [Roadmap](#roadmap).
 
 ---
 
@@ -26,16 +26,25 @@ The missing buttons require speaking Logitech's **HID++ 2.0** protocol directly 
 
 ---
 
-## What This Does
+## What's Working
 
-| Input | Configured behavior |
-|-------|---------------------|
-| Scroll wheel click | Auto-scroll mode (move mouse to scroll) |
-| Mode Shift button | Take a screenshot (Flameshot) |
-| Gesture button (click) | Super key (open app launcher) |
-| Gesture button + move mouse | Workspace switch (like 3-finger swipe) |
+| Input | Behavior |
+|-------|----------|
+| Scroll wheel click | Auto-scroll mode — hold and move mouse to scroll |
+| **Mode Shift button** | **Takes a screenshot (Flameshot)** |
+| **Gesture button (tap)** | **Opens app launcher (Super key)** |
+| Back / Forward buttons | Browser back / forward (`Alt+Left`, `Alt+Right`) |
+
+---
+
+## Roadmap
+
+These are the features currently in progress:
+
+| Input | Planned behavior |
+|-------|-----------------|
+| Gesture button + move left/right | Switch workspace (`Ctrl+Alt+←/→`) |
 | Thumb wheel | Volume up / down |
-| Everything else | Configurable via `~/.config/mx-master/config.yaml` |
 
 ---
 
@@ -43,9 +52,8 @@ The missing buttons require speaking Logitech's **HID++ 2.0** protocol directly 
 
 - Linux with Wayland
 - Python 3.10+
-- `ydotool` — key simulation on Wayland
 - `flameshot` — screenshots
-- `wireplumber` (`wpctl`) — volume control
+- `wireplumber` (`wpctl`) — volume control (used once thumb wheel is complete)
 - User must be in the `input` and `plugdev` groups:
 
 ```bash
@@ -79,18 +87,18 @@ buttons:
 
   mode_shift:
     action: command
-    value: "flameshot gui"
+    value: "flameshot gui"       # takes a screenshot
 
   gesture_click:
     action: key
-    value: "super"
+    value: "super"               # opens app launcher
 
   gesture_move:
-    action: workspace_swipe      # built-in: left/right swipe switches workspaces
+    action: workspace_swipe      # Ctrl+Alt+Left/Right (in progress)
 
   thumb_wheel_up:
     action: volume_up
-    step: 5                      # percent per tick
+    step: 5                      # percent per tick (in progress)
 
   thumb_wheel_down:
     action: volume_down
@@ -140,11 +148,11 @@ Mouse (Bluetooth HID)
                                           config.yaml mapping
                                                 │
                                          Action Runner
-                                          ├─ key        → ydotool key <combo>
+                                          ├─ key        → evdev UInput key press
                                           ├─ command    → subprocess
                                           ├─ volume     → wpctl set-volume
                                           ├─ auto_scroll → uinput scroll injection
-                                          └─ workspace  → ydotool key super+Page_Up/Down
+                                          └─ workspace  → Ctrl+Alt+Left/Right
 ```
 
 ### Technical Stack
@@ -153,7 +161,7 @@ Mouse (Bluetooth HID)
 |-----------|------|---------|
 | HID++ 2.0 | `/dev/hidraw` (raw file I/O) | Activate hidden mouse buttons |
 | Input events | `python-evdev` | Read all button/scroll events |
-| Key simulation | `ydotool` | Synthesize key presses (Wayland) |
+| Key simulation | `evdev.UInput` | Synthesize key presses (Wayland, no ydotool needed) |
 | Scroll injection | `evdev.UInput` | Inject scroll events for auto-scroll |
 | Volume control | `wpctl` (wireplumber) | Adjust system volume |
 | Config | `PyYAML` | Button → action mapping file |
@@ -172,8 +180,9 @@ Each commit in this repo represents one working stage. The git history tells the
 5. **Config system** — YAML-based button → action mapping
 6. **Action runner** — execute key combos, commands, volume, screenshots
 7. **Auto-scroll mode** — middle click enters scroll-by-movement mode
-8. **Gesture button** — click = Super, move = workspace switch
+8. **Gesture button** — tap = Super key (app launcher), Mode Shift = screenshot
 9. **Systemd integration** — run as a proper background service
+10. **Coming next** — gesture swipe = `Ctrl+Alt+←/→`, thumb wheel = volume
 
 ---
 

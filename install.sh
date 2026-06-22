@@ -6,7 +6,7 @@ echo "==> Installing MX Master Linux daemon"
 # Check groups
 if ! groups | grep -q input; then
     echo "WARNING: You are not in the 'input' group."
-    echo "Run: sudo usermod -aG input,plugdev $USER"
+    echo "Run: sudo usermod -aG input $USER"
     echo "Then log out and back in. Re-run this script after."
     exit 1
 fi
@@ -24,6 +24,18 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo "==> Config written to $CONFIG_FILE"
 else
     echo "==> Config already exists at $CONFIG_FILE (not overwriting)"
+fi
+
+# Install udev rule (gives input group access to the mouse's hidraw device)
+UDEV_RULE="/etc/udev/rules.d/99-mx-master.rules"
+if [ ! -f "$UDEV_RULE" ] || ! diff -q udev/99-mx-master.rules "$UDEV_RULE" &>/dev/null; then
+    echo "==> Installing udev rule (requires sudo)..."
+    sudo cp udev/99-mx-master.rules "$UDEV_RULE"
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger --subsystem-match=hidraw
+    echo "==> udev rule installed"
+else
+    echo "==> udev rule already up to date"
 fi
 
 # Install systemd service

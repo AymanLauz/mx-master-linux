@@ -17,8 +17,8 @@ _DEFAULTS: dict = {
         "forward":         {"action": "key",     "value": "alt+Right"},
     },
     "workspace_swipe": {
-        "left":  "super+Page_Up",
-        "right": "super+Page_Down",
+        "left":  "ctrl+alt+left",
+        "right": "ctrl+alt+right",
     },
 }
 

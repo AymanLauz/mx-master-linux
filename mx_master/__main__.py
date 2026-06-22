@@ -53,8 +53,8 @@ def main() -> None:
     except PermissionError:
         print(
             "ERROR: Permission denied accessing mouse device.\n"
-            "Make sure you are in the 'input' and 'plugdev' groups:\n"
-            "  sudo usermod -aG input,plugdev $USER\n"
+            "Make sure you are in the 'input' group:\n"
+            "  sudo usermod -aG input $USER\n"
             "Then log out and back in.",
             file=sys.stderr,
         )
