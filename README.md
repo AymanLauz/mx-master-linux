@@ -33,17 +33,17 @@ The missing buttons require speaking Logitech's **HID++ 2.0** protocol directly 
 | Scroll wheel click | Auto-scroll mode — hold and move mouse to scroll |
 | **Mode Shift button** | **Takes a screenshot (Flameshot)** |
 | **Gesture button (tap)** | **Opens app launcher (Super key)** |
+| **Gesture button + move left/right** | **Switch workspace (`Ctrl+Alt+←/→`)** |
 | Back / Forward buttons | Browser back / forward (`Alt+Left`, `Alt+Right`) |
 
 ---
 
 ## Roadmap
 
-These are the features currently in progress:
+One feature left:
 
 | Input | Planned behavior |
 |-------|-----------------|
-| Gesture button + move left/right | Switch workspace (`Ctrl+Alt+←/→`) |
 | Thumb wheel | Volume up / down |
 
 ---
@@ -182,7 +182,8 @@ Each commit in this repo represents one working stage. The git history tells the
 7. **Auto-scroll mode** — middle click enters scroll-by-movement mode
 8. **Gesture button** — tap = Super key (app launcher), Mode Shift = screenshot
 9. **Systemd integration** — run as a proper background service
-10. **Coming next** — gesture swipe = `Ctrl+Alt+←/→`, thumb wheel = volume
+10. **Gesture swipe** — move mouse while holding gesture button = `Ctrl+Alt+←/→` workspace switch
+11. **Coming next** — thumb wheel = volume
 
 ---
 

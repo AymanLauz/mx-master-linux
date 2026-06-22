@@ -144,7 +144,7 @@ class Daemon:
             if self._gesture_held:
                 # Threshold before we commit to a swipe direction
                 if abs(dx) > 30:
-                    self._runner.workspace_swipe("right" if dx > 0 else "left")
+                    self._runner.workspace_swipe("left" if dx > 0 else "right")
                     self._gesture_held = False
 
         elif event["type"] == "scroll":
